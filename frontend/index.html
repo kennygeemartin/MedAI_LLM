@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#146a59"><meta name="description" content="MedAI — a primary healthcare information assistant with a reviewed health library.">
+  <title>MedAI · Your health, better understood</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css"><script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#chat"><span class="brand-icon">✚</span> MedAI<span class="brand-dot">.</span></a>
+    <div class="workspace-label">YOUR HEALTH COMPANION</div>
+    <button class="new-chat" id="new-chat"><span>＋</span> New conversation</button>
+    <nav aria-label="Main navigation">
+      <button class="nav-item active" data-view="chat"><span>◈</span> Health assistant</button>
+      <button class="nav-item" data-view="library"><span>▤</span> Health library</button>
+      <button class="nav-item" data-view="about"><span>ⓘ</span> About & privacy</button>
+      <button class="nav-item" data-view="admin" id="admin-nav" hidden><span>▦</span> Administration</button>
+    </nav>
+    <div class="history-heading">RECENT CONVERSATIONS</div>
+    <div id="history" class="history"><p class="quiet">Sign in to save your conversations.</p></div>
+    <div class="sidebar-bottom"><div class="care-note"><span>♡</span><div><strong>Care starts with understanding</strong><p>A little clarity can make a big difference.</p></div></div>
+    <button id="account" class="account"><span class="avatar" id="avatar">U</span><span id="account-label">Sign in or create account</span><span>↗</span></button></div>
+  </aside>
+  <div class="main-shell">
+    <header class="topbar"><div><span class="eyebrow">PRIMARY HEALTHCARE</span><span class="header-divider">/</span><span id="page-label">Health assistant</span></div><span class="research-badge"><i></i> Research preview</span></header>
+    <main>
+      <section id="view-chat" class="view">
+        <div class="chat-header"><span class="pill">✧ A little guidance. A healthier you.</span><button class="text-button" id="delete-chat" hidden>Delete conversation</button></div>
+        <div id="welcome" class="welcome">
+          <div class="welcome-symbol">✚<span class="orbit orbit-one"></span><span class="orbit orbit-two"></span></div>
+          <h1>Your health,<br><em>better understood.</em></h1>
+          <p>A space to ask questions, explore trusted health information,<br class="desktop-break"> and take the next step with confidence.</p>
+          <div class="suggestions">
+            <button data-question="What should I know about malaria?"><span class="topic-icon amber">☀</span><strong>Understand a condition</strong><span>Learn about malaria and more</span><b>↗</b></button>
+            <button data-question="How can I build healthy eating habits?"><span class="topic-icon green">♧</span><strong>Build healthier habits</strong><span>Small steps for everyday wellbeing</span><b>↗</b></button>
+            <button data-question="What should I ask at my next clinic visit?"><span class="topic-icon purple">♡</span><strong>Prepare for a clinic visit</strong><span>Make your next conversation count</span><b>↗</b></button>
+          </div>
+          <div class="trust-row"><span>◉ Evidence-led information</span><span>◇ Your own conversation history</span><span>♡ Designed around people</span></div>
+        </div>
+        <div id="messages" class="messages" aria-live="polite" aria-label="Conversation"></div>
+        <div class="composer-wrap"><div class="safety-banner"><span>ⓘ</span><p>For health education, not diagnosis or prescriptions. In an emergency, seek immediate medical help.</p></div>
+          <form id="chat-form" class="composer"><label class="sr-only" for="question">Your health question</label><textarea id="question" rows="2" maxlength="2000" placeholder="What would you like to understand about your health?" required></textarea><div class="composer-footer"><span>A good place to start is with a question.</span><button type="submit" id="send" aria-label="Send question">↑</button></div></form>
+          <p class="composer-note">MedAI can make mistakes. Discuss health decisions with a qualified professional.</p>
+        </div>
+      </section>
+      <section id="view-library" class="view content-view" hidden><span class="eyebrow">KNOWLEDGE FOR EVERYDAY LIFE</span><h1>The health library.</h1><p class="lead">Explore information reviewed and published by your care administrators.</p><label class="search-field">Search topics<input id="library-search" type="search" placeholder="Try malaria, nutrition, or maternal health"></label><div id="library" class="library-grid"></div></section>
+      <section id="view-about" class="view content-view" hidden><span class="eyebrow">A CLEARER PICTURE</span><h1>Information with care.</h1><div class="prose"><h2>What MedAI does</h2><p>MedAI is a research application for primary healthcare education. It searches an administrator-reviewed health library and shows source links. When an AI service is connected, it can help explain those sources. Otherwise, you see relevant library excerpts.</p><h2>Know its limits</h2><p>It cannot diagnose conditions, prescribe medication, or replace a clinician. Emergency screening is a basic rule-based safeguard and may miss emergencies. Seek urgent professional help when needed, even if the chat does not flag your message.</p><h2>Your information</h2><p>Your name, email, conversations, and feedback are stored by the application. Authorized administrators can inspect interactions for service review. If AI is enabled, recent conversation text is sent to the configured inference service. Avoid sharing identification numbers, addresses, or other unnecessary personal details.</p><p>You can delete a conversation using the button above it. This removes its messages and feedback from the active database. Operator-managed backups may have separate retention periods. This preview has no self-service account deletion or password recovery; contact the deployment operator for help.</p><h2>Reviewed sources, visible references</h2><p>Draft documents are excluded from answers. An administrator must review and approve them before publication. Approval records indicate an operator review, not independent medical certification.</p></div></section>
+      <section id="view-admin" class="view content-view" hidden><span class="eyebrow">ADMINISTRATION</span><h1>Your care workspace.</h1><div class="admin-tabs"><button data-admin="reports" class="selected">Overview</button><button data-admin="documents">Knowledge</button><button data-admin="users">People</button><button data-admin="interactions">Interactions</button><button data-admin="audit">Audit log</button></div><div id="admin-content"></div></section>
+    </main>
+  </div>
+  <dialog id="auth-dialog"><button class="dialog-close" data-close="auth-dialog" aria-label="Close">×</button><span class="small-brand">✚ MedAI</span><h2 id="auth-title">Welcome back.</h2><p class="quiet" id="auth-subtitle">Sign in to continue your health conversations.</p><form id="auth-form"><label id="name-field" hidden>Full name<input id="full-name" autocomplete="name" minlength="2" maxlength="100"></label><label>Email address<input id="email" type="email" autocomplete="email" required maxlength="254"></label><label>Password<input id="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" required><small>At least 10 characters.</small></label><label class="checkbox-label" id="consent-field" hidden><input id="consent" type="checkbox"><span>I understand my conversations are stored and may be reviewed by administrators. MedAI provides health education.</span></label><p id="auth-error" class="error" role="alert"></p><button type="submit" class="primary" id="auth-submit">Sign in</button></form><button class="auth-switch" id="auth-switch">New here? Create an account</button></dialog>
+  <dialog id="article-dialog"><button class="dialog-close" data-close="article-dialog" aria-label="Close">×</button><div id="article-content"></div></dialog>
+  <dialog id="document-dialog"><button class="dialog-close" data-close="document-dialog" aria-label="Close">×</button><h2 id="document-title">Add health information</h2><form id="document-form"><input id="document-id" type="hidden"><label>Title<input id="doc-title" required minlength="3" maxlength="200"></label><label>Category<input id="doc-category" required minlength="2" maxlength="80" placeholder="e.g. Preventive health"></label><label>Original source URL<input id="doc-source" type="url" required placeholder="https://..."></label><label>Import a text document<input id="doc-file" type="file" accept=".txt,text/plain"></label><label>Content<textarea id="doc-content" rows="9" required minlength="30" maxlength="30000"></textarea></label><label class="checkbox-label"><input id="doc-approved" type="checkbox"><span>I have reviewed this content and its source for accuracy and suitability. Publish it to the library.</span></label><p class="error" id="document-error" role="alert"></p><button class="primary" type="submit">Save document</button></form></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body></html>

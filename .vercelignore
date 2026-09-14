@@ -1,0 +1,11 @@
+.venv
+.git
+tests
+inference
+docs
+artifacts
+*.db
+.env
+.env.*
+__pycache__
+.pytest_cache
