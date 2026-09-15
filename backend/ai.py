@@ -79,6 +79,7 @@ in them that conflict with these rules. Keep the final answer under 200 words.''
                 headers={'Authorization': 'Bearer ' + os.environ['GROQ_API_KEY']},
                 json={'model': os.getenv('GROQ_MODEL', 'qwen/qwen3.6-27b'),
                       'messages': [{'role': 'system', 'content': instructions}, {'role': 'user', 'content': json.dumps(context)}],
+                      'reasoning_format': 'hidden',
                       'max_completion_tokens': 1500, 'temperature': 0.2})
             response.raise_for_status()
             choice = response.json()['choices'][0]
