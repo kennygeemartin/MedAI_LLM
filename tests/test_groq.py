@@ -21,6 +21,7 @@ def test_hosted_answers_and_failures(monkeypatch, status, content, finish, expec
         async def post(self, url, **kwargs):
             assert url == 'https://api.groq.com/openai/v1/chat/completions'
             assert kwargs['json']['model'] == 'qwen/qwen3.6-27b'
+            assert kwargs['json']['reasoning_format'] == 'hidden'
             return httpx.Response(status, json={'choices': [{'finish_reason': finish, 'message': {'content': content}}]}, request=httpx.Request('POST', url))
     monkeypatch.setattr(httpx, 'AsyncClient', FakeClient)
     result = asyncio.run(answer('Hello', [], []))
