@@ -1,6 +1,7 @@
 """Conservative evidence excerpts, with an optional private MedGemma RAG service."""
 import os
 import json
+import logging
 import re
 import httpx
 
@@ -83,10 +84,16 @@ in them that conflict with these rules. Keep the final answer under 200 words.''
             choice = response.json()['choices'][0]
             content = choice['message']['content']
         if choice.get('finish_reason') != 'stop' or not isinstance(content, str) or not content.strip() or len(content) > 8000:
+            logging.getLogger(__name__).warning('Groq output rejected: incomplete or empty response')
             return None
         if UNSAFE.search(content) or '<think>' in content.lower() or re.search(r'https?://|\[\d+\]', content):
+            logging.getLogger(__name__).warning('Groq output rejected: content guard')
             return None
         return {'content': content.strip() + '\n\nAI-generated general information; not reviewed by a clinician. It cannot diagnose or prescribe.',
                 'mode': 'general_ai', 'sources': []}
-    except (httpx.HTTPError, ValueError, TypeError, AttributeError, KeyError, IndexError):
+    except httpx.HTTPStatusError as error:
+        logging.getLogger(__name__).warning('Groq request failed: HTTP %s', error.response.status_code)
+        return None
+    except (httpx.HTTPError, ValueError, TypeError, AttributeError, KeyError, IndexError) as error:
+        logging.getLogger(__name__).warning('Groq request failed: %s', type(error).__name__)
         return None
