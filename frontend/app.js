@@ -55,6 +55,7 @@ function renderMessage(message) {
   if (message.sources?.length) element.insertAdjacentHTML('beforeend', `<div class="source-links">${message.sources.map((s,i) => `<a href="${escapeHTML(safeURL(s.url))}" target="_blank" rel="noopener noreferrer">[${i+1}] ${escapeHTML(s.title)} ↗</a>`).join('')}</div>`);
   if (message.sender === 'assistant' && message.id) element.insertAdjacentHTML('beforeend', `<div class="feedback"><span>Was this helpful?</span><button data-feedback="${message.id}" data-rating="5">Yes</button><button data-feedback="${message.id}" data-rating="1">Not quite</button></div>`);
   $('#messages').append(element);
+  return element;
 }
 async function openConversation(id) {
   if (state.busy) return;
@@ -119,6 +120,7 @@ document.addEventListener('click', async (event) => {
 });
 $('#auth-switch').onclick = () => {state.registering = !state.registering;setAuthMode();};
 $('#account').onclick = async () => {
+  if (state.busy) return;
   if (!state.user) return openAuth();
   try {await api('/auth/logout',{method:'POST'});state.user=null;clearChat();updateAccount();await refreshHistory();await showView('chat');toast('You have signed out.');}catch(error){toast(error.message);}
 };
@@ -132,11 +134,30 @@ $('#chat-form').onsubmit = async event => {
   event.preventDefault();if(state.busy)return;if(!state.user)return openAuth();
   const question=$('#question').value.trim();if(!question)return;
   state.busy=true;$('#send').disabled=true;$('#send').textContent='…';
+  $('#question').readOnly=true;
+  const started=performance.now();
+  $('#welcome').hidden=true;
+  const pendingQuestion=renderMessage({sender:'user',content:question});
+  const thinking=document.createElement('div');
+  thinking.className='message thinking-status';
+  thinking.setAttribute('role','status');
+  thinking.setAttribute('aria-live','polite');
+  thinking.textContent='MedAI · Thinking…';
+  $('#messages').append(thinking);
+  thinking.scrollIntoView({behavior:'smooth',block:'nearest'});
+  let received=false;
   try {
     if(!state.conversation){const c=await api('/conversations',{method:'POST'});state.conversation=c.id;}
     const result=await api(`/conversations/${state.conversation}/messages`,{method:'POST',body:JSON.stringify({message:question})});
+    // Pace normal replies in the browser without adding server execution time.
+    // Urgent guidance and service failures should be displayed immediately.
+    if(!['emergency','ai_unavailable'].includes(result.reply.mode)){
+      const remaining=5000-(performance.now()-started);
+      if(remaining>0)await new Promise(resolve=>setTimeout(resolve,remaining));
+    }
+    pendingQuestion.remove();thinking.remove();received=true;
     $('#welcome').hidden=true;$('#delete-chat').hidden=false;renderMessage(result.question);renderMessage(result.reply);$('#question').value='';await refreshHistory();$('#chat-form').scrollIntoView({behavior:'smooth',block:'end'});
-  }catch(error){toast(error.message);}finally{state.busy=false;$('#send').disabled=false;$('#send').textContent='↑';}
+  }catch(error){if(!received)pendingQuestion.remove();toast(error.message);}finally{thinking.remove();state.busy=false;$('#question').readOnly=false;$('#send').disabled=false;$('#send').textContent='↑';}
 };
 $('#question').addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();$('#chat-form').requestSubmit();}});
 $('#library-search').oninput=renderLibrary;
