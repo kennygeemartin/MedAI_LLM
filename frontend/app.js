@@ -50,7 +50,7 @@ async function refreshHistory() {
 function clearChat() {state.conversation = null; $('#messages').replaceChildren(); $('#welcome').hidden = false; $('#delete-chat').hidden = true;}
 function renderMessage(message) {
   const element = document.createElement('article'); element.className = `message ${message.sender === 'user' ? 'user' : 'assistant'} ${message.mode === 'emergency' ? 'emergency' : ''}`;
-  const mode = {evidence:'Library excerpts',medgemma:'AI-assisted explanation',general_ai:'AI · General education',emergency:'Seek urgent help',no_evidence:'More guidance needed',referral:'Professional advice needed'}[message.mode];
+  const mode = {evidence:'Library excerpts',medgemma:'AI-assisted explanation',general_ai:'AI · General education',ai_unavailable:'AI temporarily unavailable',emergency:'Seek urgent help',no_evidence:'More guidance needed',referral:'Professional advice needed'}[message.mode];
   element.innerHTML = `<div class="message-head">${message.sender === 'user' ? 'You' : '✚ MedAI'}${mode ? `<span class="mode-tag">${mode}</span>` : ''}</div><div class="message-content">${escapeHTML(message.content)}</div>`;
   if (message.sources?.length) element.insertAdjacentHTML('beforeend', `<div class="source-links">${message.sources.map((s,i) => `<a href="${escapeHTML(safeURL(s.url))}" target="_blank" rel="noopener noreferrer">[${i+1}] ${escapeHTML(s.title)} ↗</a>`).join('')}</div>`);
   if (message.sender === 'assistant' && message.id) element.insertAdjacentHTML('beforeend', `<div class="feedback"><span>Was this helpful?</span><button data-feedback="${message.id}" data-rating="5">Yes</button><button data-feedback="${message.id}" data-rating="1">Not quite</button></div>`);

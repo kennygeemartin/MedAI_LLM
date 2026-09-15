@@ -49,7 +49,7 @@ Vercel's [FastAPI guide](https://vercel.com/docs/frameworks/backend/fastapi) doc
 
 Use a Groq account on its Free plan and create an API key at
 https://console.groq.com/keys. Add `GROQ_API_KEY` as a Production secret in
-Vercel; `GROQ_MODEL` defaults to `qwen/qwen3.6-27b`. Redeploy after adding it.
+Vercel; `GROQ_MODEL` defaults to `openai/gpt-oss-20b`. Redeploy after adding it.
 No GPU host or Hugging Face token is required for this alternative.
 Do not upgrade the Groq account to a paid plan if zero spending is required.
 Limits are shared across the account: https://console.groq.com/docs/rate-limits.
