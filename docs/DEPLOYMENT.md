@@ -45,6 +45,28 @@ Vercel's [FastAPI guide](https://vercel.com/docs/frameworks/backend/fastapi) doc
 
 ## 4. Private MedGemma service
 
+### Free hosted alternative: Groq
+
+Use a Groq account on its Free plan and create an API key at
+https://console.groq.com/keys. Add `GROQ_API_KEY` as a Production secret in
+Vercel; `GROQ_MODEL` defaults to `qwen/qwen3.6-27b`. Redeploy after adding it.
+No GPU host or Hugging Face token is required for this alternative.
+Do not upgrade the Groq account to a paid plan if zero spending is required.
+Limits are shared across the account: https://console.groq.com/docs/rate-limits.
+
+When this key is present, Groq takes priority over private MedGemma. Quota,
+network, invalid-output, and authentication errors fall back to library excerpts
+or the no-evidence message; they do not switch to another paid model.
+Groq answers are labeled `general_ai`, including when there is no approved
+library content. They are not clinician-reviewed and carry no fabricated source
+links. Questions, bounded recent conversation text, and relevant excerpts are
+sent to Groq. Review its data controls at https://console.groq.com/docs/your-data.
+
+The Groq adapter is covered by mocked tests. A real API key is required to
+verify model availability and generated answers in the deployed environment.
+
+### GPU-hosted MedGemma
+
 The user operating the Hugging Face account must review and accept the [MedGemma access terms](https://huggingface.co/google/medgemma-4b-it). Set `HF_TOKEN` in the GPU host's secret store. Select a CUDA host with enough memory for the model, its context, and runtime overhead; confirm performance with the workload before committing to a hosting plan.
 
 Build from the repository root:

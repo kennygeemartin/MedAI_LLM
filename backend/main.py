@@ -112,7 +112,7 @@ def set_session(response, user):
 @app.get('/api/health')
 def health(db=Depends(get_db)):
     db.execute(select(func.count(User.id)))
-    return {'status': 'ok', 'inference_configured': bool(os.getenv('INFERENCE_URL') and os.getenv('INFERENCE_API_KEY')), 'version': '0.1.0'}
+    return {'status': 'ok', 'inference_configured': bool(os.getenv('GROQ_API_KEY') or (os.getenv('INFERENCE_URL') and os.getenv('INFERENCE_API_KEY'))), 'version': '0.1.0'}
 
 @app.post('/api/auth/register', status_code=201)
 def register(data: Registration, request: Request, response: Response, db=Depends(get_db)):
