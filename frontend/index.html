@@ -50,11 +50,13 @@
       <section id="view-admin" class="view content-view" hidden><span class="eyebrow">ADMINISTRATION</span><h1>Your care workspace.</h1><div class="admin-tabs"><button data-admin="reports" class="selected">Overview</button><button data-admin="documents">Knowledge</button><button data-admin="users">People</button><button data-admin="interactions">Interactions</button><button data-admin="audit">Audit log</button></div><div id="admin-content"></div></section>
     </main>
     <footer class="site-footer">
-      <span>Proudly built by Ezeano Nnaemeka Prince</span>
-      <address>
-        <a href="tel:+2348167511717">08167511717</a>
-        <a href="mailto:np.ezeano@fpi.edu.ng">np.ezeano@fpi.edu.ng</a>
-      </address>
+      <div class="footer-inner">
+        <p class="footer-credit"><span>Proudly built by</span><strong>Ezeano Nnaemeka Prince</strong></p>
+        <address aria-label="Developer contact details">
+          <a class="footer-contact" href="tel:+2348167511717"><span>Phone</span><strong>08167511717</strong></a>
+          <a class="footer-contact" href="mailto:np.ezeano@fpi.edu.ng"><span>Email</span><strong>np.ezeano@fpi.edu.ng</strong></a>
+        </address>
+      </div>
     </footer>
   </div>
   <dialog id="auth-dialog"><button class="dialog-close" data-close="auth-dialog" aria-label="Close">×</button><span class="small-brand">✚ MedAI</span><h2 id="auth-title">Welcome back.</h2><p class="quiet" id="auth-subtitle">Sign in to continue your health conversations.</p><form id="auth-form"><label id="name-field" hidden>Full name<input id="full-name" autocomplete="name" minlength="2" maxlength="100"></label><label>Email address<input id="email" type="email" autocomplete="email" required maxlength="254"></label><label>Password<input id="password" type="password" autocomplete="current-password" minlength="10" maxlength="72" required><small>At least 10 characters.</small></label><label class="checkbox-label" id="consent-field" hidden><input id="consent" type="checkbox"><span>I understand my conversations are stored and may be reviewed by administrators. MedAI provides health education.</span></label><p id="auth-error" class="error" role="alert"></p><button type="submit" class="primary" id="auth-submit">Sign in</button></form><button class="auth-switch" id="auth-switch">New here? Create an account</button></dialog>
