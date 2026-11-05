@@ -56,3 +56,7 @@ label small,.interaction small{font-size:14px}
   .footer-inner{flex-direction:column;align-items:flex-start;gap:14px}
   .footer-inner address{gap:18px}
 }
+
+/* Registration fields share the existing account form styling. */
+#auth-form select{font:inherit;display:block;width:100%;padding:12px;border:1px solid var(--border);border-radius:8px;background:#fff;color:inherit;margin-top:6px}
+#auth-dialog{max-height:90dvh;overflow-y:auto}

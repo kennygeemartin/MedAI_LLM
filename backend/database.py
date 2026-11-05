@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, event, ForeignKey, String, Text, DateTime, Boolean
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 
 load_dotenv()
 PRODUCTION = os.getenv('APP_ENV') == 'production' or bool(os.getenv('VERCEL'))
@@ -33,6 +33,26 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(20), default='patient')
     active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+    profile: Mapped["UserProfile | None"] = relationship(back_populates='user', uselist=False, cascade='all, delete-orphan')
+
+class UserProfile(Base):
+    """Additive table: existing user rows and credentials need no alteration."""
+    __tablename__ = 'user_profiles'
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), primary_key=True)
+    gender: Mapped[str] = mapped_column(String(30))
+    age: Mapped[int]
+    phone_number: Mapped[str] = mapped_column(String(25))
+    username: Mapped[str] = mapped_column(String(30), unique=True, index=True)
+    user: Mapped["User"] = relationship(back_populates='profile')
+
+def ensure_profile_table():
+    """Create only the new profile table, including on existing deployments."""
+    from sqlalchemy import text
+    with engine.begin() as connection:
+        if connection.dialect.name == 'postgresql':
+            # Serialize cold starts while the additive table is first created.
+            connection.execute(text('SELECT pg_advisory_xact_lock(63814021)'))
+        UserProfile.__table__.create(connection, checkfirst=True)
 
 class Conversation(Base):
     __tablename__ = 'conversations'

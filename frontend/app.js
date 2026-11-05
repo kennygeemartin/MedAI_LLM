@@ -21,8 +21,14 @@ function updateAccount() {
 }
 function openAuth() {if (!$('#auth-dialog').open) $('#auth-dialog').showModal();}
 function setAuthMode() {
-  $('#name-field').hidden = $('#consent-field').hidden = !state.registering;
-  $('#full-name').required = $('#consent').required = state.registering;
+  for (const id of ['full-name', 'gender', 'age', 'phone-number', 'username']) {
+    const input = $('#' + id);
+    input.closest('label').hidden = !state.registering;
+    input.required = state.registering;
+    input.disabled = !state.registering;
+  }
+  $('#consent-field').hidden = !state.registering;
+  $('#consent').required = state.registering;
   $('#auth-title').textContent = state.registering ? 'A healthier start.' : 'Welcome back.';
   $('#auth-subtitle').textContent = state.registering ? 'Create an account to save your conversations.' : 'Sign in to continue your health conversations.';
   $('#auth-submit').textContent = state.registering ? 'Create account' : 'Sign in';
@@ -126,7 +132,7 @@ $('#account').onclick = async () => {
 };
 $('#auth-form').onsubmit = async event => {
   event.preventDefault(); $('#auth-submit').disabled = true; $('#auth-error').textContent = '';
-  try {state.user=await api('/auth/' + (state.registering ? 'register' : 'login'),{method:'POST',body:JSON.stringify({email:$('#email').value,password:$('#password').value,...(state.registering ? {full_name:$('#full-name').value,consent:$('#consent').checked} : {})})});$('#auth-dialog').close();$('#password').value='';updateAccount();await refreshHistory();toast('You’re signed in.');}catch(error){$('#auth-error').textContent=error.message;}finally{$('#auth-submit').disabled=false;}
+  try {state.user=await api('/auth/' + (state.registering ? 'register' : 'login'),{method:'POST',body:JSON.stringify({email:$('#email').value,password:$('#password').value,...(state.registering ? {full_name:$('#full-name').value,gender:$('#gender').value,age:Number($('#age').value),phone_number:$('#phone-number').value,username:$('#username').value,consent:$('#consent').checked} : {})})});$('#auth-dialog').close();$('#password').value='';updateAccount();await refreshHistory();toast('You’re signed in.');}catch(error){$('#auth-error').textContent=error.message;}finally{$('#auth-submit').disabled=false;}
 };
 $('#new-chat').onclick = async () => {if(state.busy)return;clearChat();await showView('chat');try{await refreshHistory();}catch(error){toast(error.message);}$('#question').focus();};
 $('#delete-chat').onclick = async () => {if(!state.conversation||state.busy||!confirm('Permanently delete this conversation and its feedback?'))return;try{await api(`/conversations/${state.conversation}`,{method:'DELETE'});clearChat();await refreshHistory();toast('Conversation deleted.');}catch(error){toast(error.message);}};

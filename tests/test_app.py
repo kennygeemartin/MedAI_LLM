@@ -30,7 +30,7 @@ def clients(tmp_path):
     engine.dispose()
 
 def register(client, email='patient@example.com'):
-    response = client.post('/api/auth/register', json={'email':email,'full_name':'Test Person','password':PASSWORD,'consent':True})
+    response = client.post('/api/auth/register', json={'email':email,'full_name':'Test Person','password':PASSWORD,'consent':True,'gender':'Female','age':30,'phone_number':'+2348012345678','username':email.split('@')[0]})
     assert response.status_code == 201, response.text
     return response.json()
 

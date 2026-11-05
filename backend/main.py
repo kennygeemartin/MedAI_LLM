@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select, func, delete
 from sqlalchemy.exc import IntegrityError
-from backend.database import Base, engine, get_db, User, Conversation, Message, Document, Feedback, Audit, PRODUCTION, now
+from backend.database import Base, engine, get_db, User, UserProfile, ensure_profile_table, Conversation, Message, Document, Feedback, Audit, PRODUCTION, now
 from backend.security import current_user, admin_user, hash_password, verify_password, token_for, DUMMY_HASH, limit
 from backend.ai import answer
 
@@ -18,6 +18,7 @@ from backend.ai import answer
 async def lifespan(app):
     if not PRODUCTION:
         Base.metadata.create_all(engine)
+    ensure_profile_table()
     yield
 
 app = FastAPI(title='MedAI', version='0.1.0', lifespan=lifespan, docs_url=None if PRODUCTION else '/api/docs', redoc_url=None)
@@ -56,7 +57,46 @@ class Credentials(BaseModel):
 
 class Registration(Credentials):
     full_name: str = Field(min_length=2, max_length=100)
+    gender: str
+    age: int = Field(strict=True, ge=1, le=120)
+    phone_number: str = Field(min_length=7, max_length=25)
+    username: str = Field(min_length=3, max_length=30)
     consent: bool
+
+    @field_validator('full_name')
+    @classmethod
+    def valid_name(cls, value):
+        value = value.strip()
+        if len(value) < 2:
+            raise ValueError('Enter your full name.')
+        return value
+
+    @field_validator('gender')
+    @classmethod
+    def valid_gender(cls, value):
+        value = value.strip()
+        if value not in ('Male', 'Female', 'Other', 'Prefer not to say'):
+            raise ValueError('Select a gender option.')
+        return value
+
+    @field_validator('phone_number')
+    @classmethod
+    def valid_phone(cls, value):
+        value = value.strip()
+        if not re.fullmatch(r'\+?[0-9 ()-]+', value):
+            raise ValueError('Enter a valid phone number.')
+        digits = re.sub(r'\D', '', value)
+        if not 7 <= len(digits) <= 15:
+            raise ValueError('Phone number must contain 7 to 15 digits.')
+        return ('+' if value.startswith('+') else '') + digits
+
+    @field_validator('username')
+    @classmethod
+    def valid_username(cls, value):
+        value = value.strip().lower()
+        if not re.fullmatch(r'[a-z0-9_]{3,30}', value):
+            raise ValueError('Username must be 3 to 30 letters, numbers or underscores.')
+        return value
 
 class ChatInput(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
@@ -119,13 +159,14 @@ def register(data: Registration, request: Request, response: Response, db=Depend
     limit(db, 'register:' + (request.client.host if request.client else 'unknown'), 10)
     if not data.consent:
         raise HTTPException(400, 'Please acknowledge how your conversation data is used.')
-    user = User(full_name=data.full_name.strip(), email=data.email, password_hash=hash_password(data.password))
+    user = User(full_name=data.full_name, email=data.email, password_hash=hash_password(data.password))
+    user.profile = UserProfile(gender=data.gender, age=data.age, phone_number=data.phone_number, username=data.username)
     db.add(user)
     try:
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(409, 'An account already exists for this email.')
+        raise HTTPException(409, 'An account already exists for this email address or username.')
     set_session(response, user)
     return user_json(user)
 
